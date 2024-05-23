@@ -7,9 +7,12 @@ services:
     working_dir: /face_recognition/examples
     build:
       context: .
+      dockerfile: Dockerfile
+      args:
+        - NO_CACHE=1
       #Uncomment this line to run the example on the GPU (requires Nvidia-Docker)
       # dockerfile: Dockerfile.gpu 
-    command: python3 -u find_faces_in_picture_cnn.py
+    command: python3 recognize_faces_in_pictures.py
     volumes:
       - ./:/face_recognition
     #Uncomment this line to run the example on the GPU (requires Nvidia-Docker)
