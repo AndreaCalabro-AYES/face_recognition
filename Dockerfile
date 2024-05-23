@@ -54,5 +54,6 @@ RUN cd /root/face_recognition && \
 # Add pip3 install opencv-python==4.1.2.30 if you want to run the live webcam examples --> not working! Try with latest version
 RUN pip3 install opencv-python==4.9.0.80
 
-CMD cd /root/face_recognition/examples && \
-    python3 recognize_faces_in_pictures.py
+# Not needed as we use the docker-compose command
+# CMD cd /root/face_recognition/examples && \
+    # python3 recognize_faces_in_pictures.py

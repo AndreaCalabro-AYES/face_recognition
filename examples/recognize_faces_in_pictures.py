@@ -5,7 +5,7 @@ biden_image = face_recognition.load_image_file("biden.jpg")
 obama_image = face_recognition.load_image_file("obama.jpg")
 unknown_image = face_recognition.load_image_file("obama2.jpg")
 
-print("We're getting there")
+print("Running the modified version 0.1")
 
 # Get the face encodings for each face in each image file
 # Since there could be more than one face in each image, it returns a list of encodings.
