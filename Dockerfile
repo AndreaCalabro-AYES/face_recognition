@@ -1,9 +1,8 @@
-# This is a sample Dockerfile you can modify to deploy your own app based on face_recognition
+# Use a multi-architecture base image
+FROM python:3.10.3-slim
 
-FROM python:3.10.3-slim-bullseye
-
-RUN apt-get -y update
-RUN apt-get install -y --fix-missing \
+# Set the architecture-specific dependencies
+RUN apt-get update && apt-get install -y --fix-missing \
     build-essential \
     cmake \
     gfortran \
@@ -23,30 +22,37 @@ RUN apt-get install -y --fix-missing \
     python3-dev \
     python3-numpy \
     software-properties-common \
-    zip \
-    && apt-get clean && rm -rf /tmp/* /var/tmp/*
+    zip
 
+# Additional dependencies for Raspberry Pi (ARM)
+RUN if [ "$(uname -m)" = "armv7l" ]; then \
+    echo "Installing ARM-specific dependencies"; \
+    apt-get update && apt-get install -y --fix-missing \
+        libopenblas-dev; \
+fi
+
+# Additional dependencies for x86 (Windows/Mac)
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
+    echo "Installing x86_64-specific dependencies"; \
+    apt-get update && apt-get install -y --fix-missing \
+        libopenblas-dev; \
+fi
+
+# Install dlib
 RUN cd ~ && \
     mkdir -p dlib && \
     git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ && \
-    cd  dlib/ && \
+    cd dlib/ && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
-
-# The rest of this file just runs an example script.
-
-# If you wanted to use this Dockerfile to run your own app instead, maybe you would do this:
-# COPY . /root/your_app_or_whatever
-# RUN cd /root/your_app_or_whatever && \
-#     pip3 install -r requirements.txt
-# RUN whatever_command_you_run_to_start_your_app
-
+# Copy the face recognition app
 COPY . /root/face_recognition
 RUN cd /root/face_recognition && \
     pip3 install -r requirements.txt && \
     python3 setup.py install
 
-# Add pip3 install opencv-python==4.1.2.30 if you want to run the live webcam examples
+# Add pip3 install opencv-python==4.1.2.30 if you want to run the live webcam examples --> not working! Try with latest version
+RUN pip3 install opencv-python==4.9.0.80
 
 CMD cd /root/face_recognition/examples && \
     python3 recognize_faces_in_pictures.py
