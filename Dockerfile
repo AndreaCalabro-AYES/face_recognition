@@ -24,15 +24,16 @@ RUN apt-get update && apt-get install -y --fix-missing \
     software-properties-common \
     zip
 
+RUN echo "The specific CPU $(uname -m)"
 # Additional dependencies for Raspberry Pi (ARM)
-RUN if [ "$(uname -m)" = "armv7l" ]; then \
+RUN if [ '$(uname -m)' = "armv7l" ]; then \
     echo "Installing ARM-specific dependencies"; \
     apt-get update && apt-get install -y --fix-missing \
         libopenblas-dev; \
 fi
 
 # Additional dependencies for x86 (Windows/Mac)
-RUN if [ "$(uname -m)" = "x86_64" ]; then \
+RUN if [ '$(uname -m)' = "x86_64" ]; then \
     echo "Installing x86_64-specific dependencies"; \
     apt-get update && apt-get install -y --fix-missing \
         libopenblas-dev; \
@@ -51,6 +52,7 @@ RUN cd /root/face_recognition && \
     pip3 install -r requirements.txt && \
     python3 setup.py install
 
+RUN echo "Running the application"
 # Add pip3 install opencv-python==4.1.2.30 if you want to run the live webcam examples --> not working! Try with latest version
 RUN pip3 install opencv-python==4.9.0.80
 
