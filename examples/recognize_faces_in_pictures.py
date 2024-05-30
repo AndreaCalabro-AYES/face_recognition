@@ -1,4 +1,5 @@
 import face_recognition
+import cv2
 
 # Load the jpg files into numpy arrays
 biden_image = face_recognition.load_image_file("biden.jpg")
@@ -29,3 +30,33 @@ results = face_recognition.compare_faces(known_faces, unknown_face_encoding)
 print("Is the unknown face a picture of Biden? {}".format(results[0]))
 print("Is the unknown face a picture of Obama? {}".format(results[1]))
 print("Is the unknown face a new person that we've never seen before? {}".format(not True in results))
+
+multiple_faces_image = face_recognition.load_image_file("jane-goodall-monkey-1.jpg")
+faces_locations = face_recognition.face_locations(multiple_faces_image)
+faces_locations_cnn = face_recognition.face_locations(multiple_faces_image, model="cnn")
+print(f"These are the face locations {faces_locations}")
+print(f"These are the face locations found with the refined cnn model {faces_locations_cnn}")
+
+new_image = cv2.imread("jane-goodall-monkey-1.jpg")
+for face in faces_locations:
+    (top, right, bottom, left) = face
+    cv2.rectangle(new_image, (left, top), (right, bottom), color=(0,255,0), thickness=2)
+
+# save the image
+cv2.imwrite("boxed_faces.png", new_image)
+print("Boxed Image Created without cnn")
+
+new_image = cv2.imread("jane-goodall-monkey-1.jpg")
+for face in faces_locations_cnn:
+    (top, right, bottom, left) = face
+    cv2.rectangle(new_image, (left, top), (right, bottom), color=(0,255,0), thickness=2)
+
+# save the image
+cv2.imwrite("boxed_faces_cnn.png", new_image)
+print("Boxed Image Created with cnn")
+
+
+# # Display the image
+# cv2.imshow('Face Detection', new_image)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
