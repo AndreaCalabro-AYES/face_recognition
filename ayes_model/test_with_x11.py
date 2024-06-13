@@ -80,7 +80,6 @@ known_encodings = [np.array(encoding['encoding']) for encoding in db]
 # Initialize some variables
 face_locations = []
 face_encodings = []
-face_names = []
 process_this_frame = True
 frame_nb = 1
 
@@ -92,11 +91,9 @@ while True:
     if frame_nb > frames:
         print("finished!")
         break
-        
     
+    face_names = []    
     
-    
-
     # Only process every other frame of video to save time
     if process_this_frame:
         # Resize frame of video to 1/4 size for faster face recognition processing
@@ -114,36 +111,34 @@ while True:
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_encodings, face_encoding)
             indexes = find_true_indices(matches)
-            for index in indexes:
-                print(names[index])
+            [face_names.append(names[index]) for index in indexes]
+            
+    process_this_frame = not process_this_frame
 
-        # If you had more than 2 faces, you could make this logic a lot prettier
-        # but I kept it simple for the demo
-        # name = None
-        # if match[0]:
-        #     name = "Lin-Manuel Miranda"
-        # elif match[1]:
-        #     name = "Alex Lacamoire"
+    # Display the results
+    for (top, right, bottom, left), name in zip(face_locations, face_names):
+        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
+        top *= 4
+        right *= 4
+        bottom *= 4
+        left *= 4
 
-        # face_names.append(name)
+        # Draw a box around the face
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-#     # Label the results
-#     for (top, right, bottom, left), name in zip(face_locations, face_names):
-#         if not name:
-#             continue
+        # Draw a label with a name below the face
+        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-#         # Draw a box around the face
-#         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+    # Display the resulting image
+    cv2.imshow('Video', frame)
 
-#         # Draw a label with a name below the face
-#         cv2.rectangle(frame, (left, bottom - 25), (right, bottom), (0, 0, 255), cv2.FILLED)
-#         font = cv2.FONT_HERSHEY_DUPLEX
-#         cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+    # Hit 'q' on the keyboard to quit!
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
-#     # Write the resulting image to the output video file
-#     print("Writing frame {} / {}".format(frame_number, length))
-#     output_movie.write(frame)
+cv2.destroyAllWindows()
 
-# # All done!
-# input_movie.release()
-# cv2.destroyAllWindows()
+
+

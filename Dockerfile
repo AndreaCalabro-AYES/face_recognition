@@ -25,14 +25,14 @@ RUN apt-get update && apt-get install -y --fix-missing \
     software-properties-common \
     zip
 
-# RUN echo "x11 server forwarding dependencies - need to scale up the containers architecture"
-# RUN apt-get update && apt-get install -y --fix-missing \
-#     libx11-dev \
-#     libgtk-3-dev \
-#     libboost-python-dev \
-#     x11-apps \
-#     xauth \
-#     imagemagick
+RUN echo "x11 server forwarding dependencies - need to scale up the containers architecture"
+RUN apt-get update && apt-get install -y --fix-missing \
+    libx11-dev \
+    libgtk-3-dev \
+    libboost-python-dev \
+    x11-apps \
+    xauth \
+    imagemagick
 
 RUN echo "The specific CPU $(uname -m)"
 # Additional dependencies for Raspberry Pi (ARM)
