@@ -44,20 +44,16 @@ def create_encoding(image_path):
     encoding = face_recognition.face_encodings(picture, num_jitters=50, model="large")[0]
     return encoding
 
-def dummy_test_function(encoding, name, test_dir):
+def test_function(encoding, name, test_dir):
     """
     Here we test only against pictures, for the video use the specific path
     """
     encoding = np.array(encoding)
-    print(type(encoding))
-    print(encoding.shape)
     for test_filename in os.listdir(test_dir):
         test_name, test_ext = os.path.splitext(test_filename)
         if (name in test_name) and (test_ext.lower() in ['.jpg', '.jpeg', '.png']):
             print(f"Testing if {name} is recognized in {test_filename}")
             test_face_encoding = create_encoding(os.path.join(test_dir, test_filename))
-            print(type(test_face_encoding))
-            print(test_face_encoding.shape)
             result = face_recognition.compare_faces([encoding], test_face_encoding)
     return result
 
@@ -92,7 +88,7 @@ def main():
         name = new_encoding['name']
         encoding = new_encoding['encoding']
         
-        if dummy_test_function(encoding, name, test_dir):
+        if test_function(encoding, name, test_dir):
             encodings.append(new_encoding)
         else:
             print(f"Encoding for {name} failed the test")
