@@ -1,3 +1,52 @@
+# AYES version 
+This is still a draft, here we will list what is needed to know for the AYES version of the face recognition app. 
+
+## Prerequisites 
+To use some of the applications, you may need to perform x11 server forwarding - in order to do so, please go to the README file of the magic mirror, later on we will better organize the folder structure.
+- Docker Desktop (again go to the Magic Mirror project to see how to obtain this)
+
+## Info dump
+### Project Creation
+1. Create a repository 
+2. Clone the project in that repository (git clone https://github.com/AndreaCalabro-AYES/face_recognition.git)
+
+### Project structure
+As of now everything is there, hence it's a bit heavy. Later on we will have a phase of optimization.
+- We have multiple dockerfiles, one that as of now hosts everything we need for all the possible applications, and one to use nvidia GPUs (there for eventual future needs)
+- There is a single docker-compose file. This is the one that will be used to launch the container, and it is where you should put your IP address if needed. 
+- ayes_model: where we train and test our model
+- ayes_test: hopefully someone will fill this :) 
+- mm_application: where we store the py files for the application that will be used in the magic mirror
+- all other folders: examples from the main project, still there for reference. 
+
+### What to do
+1. *Train the model*
+In the ayes_model folder there are two subfolders
+- test_files
+- train_files 
+In both you will need to put a different picture of you, the one in train_files will be used to tune the model and the one in test_files to test it ! 
+It's quite **important** to give the correct name to both: use the same name, and such name will be also used as identifier for your face encoding from now on. 
+In the docker-compose file launch the command python3 create_face_encoding_db
+This will automatically manage the update of a database (now json, need optimization here as well)
+After this you will have to delete both pictures from the folder - still have to understand how to correctly manage the gitignore file. 
+We will only updload the database with the encodings, we may also think to some encryption phase in between. 
+
+2. *Test the model with a video*
+If you add a video to the test_files folder, and have the x11 server forwarding working, you can launch the following script
+python3 test_with_x11.py
+This will take that video, and draw a box around all the faces, and write the names at the bottom of the box
+
+
+
+
+
+
+
+
+
+
+
+
 # Face Recognition
 
 _You can also read a translated version of this file [in Chinese 简体中文版](https://github.com/ageitgey/face_recognition/blob/master/README_Simplified_Chinese.md) or [in Korean 한국어](https://github.com/ageitgey/face_recognition/blob/master/README_Korean.md) or [in Japanese 日本語](https://github.com/m-i-k-i/face_recognition/blob/master/README_Japanese.md)._
