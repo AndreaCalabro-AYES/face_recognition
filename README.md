@@ -24,17 +24,20 @@ As of now everything is there, hence it's a bit heavy. Later on we will have a p
 In the ayes_model folder there are two subfolders
 - test_files
 - train_files 
+
 In both you will need to put a different picture of you, the one in train_files will be used to tune the model and the one in test_files to test it ! 
-It's quite **important** to give the correct name to both: use the same name, and such name will be also used as identifier for your face encoding from now on. 
+It's quite **important** to give the correct name to both: the name of the tuning image will be used as identifier for your face encoding from now on, and to look for the correct test file!
 In the docker-compose file launch the command python3 create_face_encoding_db
-This will automatically manage the update of a database (now json, need optimization here as well)
+This will automatically manage the update of a database (now json, need optimization here as well).
 After this you will have to delete both pictures from the folder - still have to understand how to correctly manage the gitignore file. 
-We will only updload the database with the encodings, we may also think to some encryption phase in between. 
+We will only updload the database with the encodings, we may also think to some encryption phase in between. This is to avoid publishing our images on the web! 
 
 2. *Test the model with a video*
-If you add a video to the test_files folder, and have the x11 server forwarding working, you can launch the following script
+If you add a video to the test_files folder, and have the x11 server forwarding working, you can launch the following script in the docker container
 python3 test_with_x11.py
-This will take that video, and draw a box around all the faces, and write the names at the bottom of the box
+(Now you also have to open the python file, and put the correct video filename, sorry)
+This will take that video, and draw a box around all the faces, and write the names at the bottom of the box. 
+The x11 server forwarding will let you see the result. It's not very fast, but that is needed for eventual debugging of our own model. Again, optimization will be needed. 
 
 
 
