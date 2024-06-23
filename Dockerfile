@@ -54,6 +54,9 @@ RUN cd ~ && \
     mkdir -p dlib && \
     git clone -b 'v19.9' --single-branch https://github.com/davisking/dlib.git dlib/ && \
     cd dlib/ && \
+    # Downgrade NumPy and upgrade pybind11 https://github.com/pybind/pybind11/issues/5009
+    pip install numpy==1.26.4 && \
+    pip install pybind11==2.12.0 && \
     python3 setup.py install --yes USE_AVX_INSTRUCTIONS
 
 # Copy the face recognition app
@@ -63,7 +66,6 @@ RUN cd /root/face_recognition && \
     python3 setup.py install
 
 RUN echo "Running the application"
-# Add pip3 install opencv-python==4.1.2.30 if you want to run the live webcam examples --> not working! Try with latest version
 RUN pip3 install opencv-python==4.9.0.80
 
 # Not needed as we use the docker-compose command
