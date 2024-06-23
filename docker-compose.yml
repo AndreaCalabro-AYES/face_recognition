@@ -18,13 +18,13 @@ services:
     
     # Update the encodings
     working_dir: /face_recognition/ayes_model
-    command: python3 test_with_x11.py
+    command: python3 facerec_on_rasp_mock.py
     # command: python3 create_face_encoding_db.py
     # Update the encodings 
 
     # uncomment this if you want to see something via x11 forwarding
     environment:
-      - DISPLAY=<YOUR_IP_ADDRESS>:0
+      - DISPLAY= <YOUR_IP_ADDRESS_HERE>:0
     # Until here for x11 forwarding pt 1 
     volumes:
       - ./:/face_recognition
