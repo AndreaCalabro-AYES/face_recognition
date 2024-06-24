@@ -9,6 +9,8 @@ import numpy as np
 import cv2
 import time
 
+
+
 def load_db(db_path):
     """
     Load the existing encodings json file, to get the existing encodings 
@@ -42,8 +44,7 @@ def find_true_indices(boolean_list):
     Find the indexes of the recognized persons 
     """
     return [index for index, value in enumerate(boolean_list) if value]
-
-    
+   
 
  
 test_dir = './test_files'  
@@ -66,26 +67,30 @@ print("Encodings have been loaded", flush=True)
 # Initialize some variables
 face_locations = []
 face_encodings = []
-process_this_frame = True
 frame_nb = 1
 prev_faces_nb = 0
 
+FRAMES_JUMP = 10
+
 print("Ready to start recognition", flush=True)
 
+count = 0
 
 while True:
 
     
-    face_names = []    
-    
-    # Only process every other frame of video to save time
-    if process_this_frame:
+    face_names = []   
+    count += 1 
+
+    # Only process every FRAMES_JUMP of video to save time
+    if count % FRAMES_JUMP == 0:
         
         # Grab a single frame of video
         ret, frame = input_movie.read()
         frame_nb += 1
         if frame_nb > frames:
             print("finished!", flush=True)
+            check = False
             break
         
         # Add the delay - based on the fps of the stream
@@ -98,20 +103,20 @@ while True:
         rgb_small_frame = small_frame[:, :, ::-1]
         
         # Find all the faces and face encodings in the current frame of video
-        cnn_face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
-        normal_face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
+        # face_locations = face_recognition.face_locations(rgb_small_frame)
         
         if len(face_locations) == 0:
             
-            print("No faces are being detected")
+            print("No faces are being detected", flush=True)
         
         elif len(face_locations) == prev_faces_nb:
             
-            print("Still here?")
+            print("Still here?", flush=True)
         
-        if len(face_locations) > prev_faces_nb:
+        elif len(face_locations) > prev_faces_nb:
             
-            print("I see someone new")
+            print("I see someone new", flush=True)
                 
             
             face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
@@ -126,6 +131,13 @@ while True:
             print(face_names)
 
         prev_faces_nb = len(face_locations)
-
-    # Process one frame each 2 
-    process_this_frame = not process_this_frame
+    else:
+        # Grab a single frame of video
+        ret, frame = input_movie.read()
+        frame_nb += 1
+        if frame_nb > frames:
+            print("finished!", flush=True)
+            check = False
+            break
+        
+    
