@@ -23,7 +23,11 @@ RUN apt-get update && apt-get install -y --fix-missing \
     python3-dev \
     python3-numpy \
     software-properties-common \
-    zip
+    zip \
+# Added for webcam support
+    v4l-utils \  
+    ffmpeg       
+
 
 RUN echo "x11 server forwarding dependencies - need to scale up the containers architecture"
 RUN apt-get update && apt-get install -y --fix-missing \

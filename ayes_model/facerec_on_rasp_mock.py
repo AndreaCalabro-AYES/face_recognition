@@ -82,7 +82,7 @@ while True:
     face_names = []   
     count += 1 
 
-    # Only process every FRAMES_JUMP of video to save time
+    # Only process every other FRAMES_JUMP of video to save time
     if count % FRAMES_JUMP == 0:
         
         # Grab a single frame of video
