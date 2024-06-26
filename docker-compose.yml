@@ -7,7 +7,7 @@ services:
 
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.rasp
 
     working_dir: /face_recognition/mm_application
     command: python3 facerec_on_rasp_usb_camera.py
