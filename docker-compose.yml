@@ -2,7 +2,7 @@ version: '3'
 
 services:
   face_recognition:
-    image: face_recognition
+    image: face_recognition_on_rasp
     container_name: face_recognition
 
     build:

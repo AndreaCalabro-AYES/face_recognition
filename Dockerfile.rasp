@@ -1,7 +1,8 @@
+# syntax=docker/dockerfile:1
 # Dockerfile
 FROM python:3.10.3-slim
 
-RUN echo "Face recognition app dependencies for raspberry pi"
+RUN echo "Face recognition app dependencies for Raspberry Pi"
 
 # Install necessary dependencies
 RUN apt-get update && apt-get install -y --fix-missing \
@@ -27,8 +28,20 @@ RUN apt-get update && apt-get install -y --fix-missing \
     zip \
     v4l-utils \
     ffmpeg \
-    libblas-dev 
-    
+    libblas-dev
+
+# Compile and install OpenBLAS from source
+RUN git clone https://github.com/xianyi/OpenBLAS.git && \
+    cd OpenBLAS && \
+    make TARGET=CORTEXA72 FC=gfortran && \
+    make PREFIX=/usr/local install && \
+    cd .. && \
+    rm -rf OpenBLAS
+
+# Set environment variables for OpenBLAS
+ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+ENV OPENBLAS_NUM_THREADS=1
+
 # Install dlib
 RUN cd /root && \
     git clone -b 'v19.22' --single-branch https://github.com/davisking/dlib.git dlib/ && \
@@ -36,7 +49,7 @@ RUN cd /root && \
     # Downgrade NumPy and upgrade pybind11 https://github.com/pybind/pybind11/issues/5009
     pip install numpy==1.26.4 && \
     pip install pybind11==2.12.0 && \
-    python3 setup.py install --yes USE_AVX_INSTRUCTIONS
+    python3 setup.py install
 
 # Copy the face recognition app
 COPY . /root/face_recognition
