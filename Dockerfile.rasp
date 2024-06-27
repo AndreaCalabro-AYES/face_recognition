@@ -1,10 +1,7 @@
-# syntax=docker/dockerfile:1
-# Dockerfile
-FROM python:3.10.3-slim
+# Use the official Python image for ARM64
+FROM arm64v8/python:3.10-slim-bullsey
 
-RUN echo "Face recognition app dependencies for Raspberry Pi"
-
-# Install necessary dependencies
+# Install build essentials and tools
 RUN apt-get update && apt-get install -y --fix-missing \
     build-essential \
     cmake \
@@ -12,6 +9,12 @@ RUN apt-get update && apt-get install -y --fix-missing \
     git \
     wget \
     curl \
+    software-properties-common \
+    zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install graphics and multimedia libraries
+RUN apt-get update && apt-get install -y --fix-missing \
     graphicsmagick \
     libgraphicsmagick1-dev \
     libatlas-base-dev \
@@ -22,44 +25,36 @@ RUN apt-get update && apt-get install -y --fix-missing \
     liblapack-dev \
     libswscale-dev \
     pkg-config \
-    python3-dev \
-    python3-numpy \
-    software-properties-common \
-    zip \
     v4l-utils \
     ffmpeg \
-    libblas-dev
+    && rm -rf /var/lib/apt/lists/*
 
-# Compile and install OpenBLAS from source
-RUN git clone https://github.com/xianyi/OpenBLAS.git && \
-    cd OpenBLAS && \
-    make TARGET=CORTEXA72 FC=gfortran && \
-    make PREFIX=/usr/local install && \
-    cd .. && \
-    rm -rf OpenBLAS
+# Install OpenBLAS
+RUN apt-get update && apt-get install -y libopenblas-dev && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for OpenBLAS
-ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/usr/lib/openblas:$LD_LIBRARY_PATH
 ENV OPENBLAS_NUM_THREADS=1
 
-# Install dlib
-RUN cd /root && \
-    git clone -b 'v19.22' --single-branch https://github.com/davisking/dlib.git dlib/ && \
-    cd dlib/ && \
-    # Downgrade NumPy and upgrade pybind11 https://github.com/pybind/pybind11/issues/5009
-    pip install numpy==1.26.4 && \
-    pip install pybind11==2.12.0 && \
-    python3 setup.py install
+# Install numpy and pybind11 # won't be needed with new stable np 2.x versions
+RUN echo "Install numpy and pybind11, needed for unstable numpy 2.0 initial release"
+RUN pip -v install numpy==1.26.4 pybind11==2.12.0
+
+# Clone dlib repository
+RUN cd /root && git clone -b 'v19.22' --single-branch https://github.com/davisking/dlib.git dlib
+
+# Build and install dlib
+RUN cd /root/dlib && python3 setup.py install
 
 # Copy the face recognition app
 COPY . /root/face_recognition
 WORKDIR /root/face_recognition
 
 # Install Python dependencies
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Install specific version of opencv-python
-RUN pip3 install opencv-python==4.9.0.80
+RUN pip install opencv-python==4.9.0.80
 
 # Set the entrypoint to python script
 ENTRYPOINT ["python3", "recognize_faces_in_pictures.py"]
