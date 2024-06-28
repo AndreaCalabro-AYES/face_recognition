@@ -64,4 +64,4 @@ RUN pip install -r requirements.txt
 RUN pip install opencv-python==4.9.0.80
 
 # Set the entrypoint to python script
-# ENTRYPOINT ["python3", "recognize_faces_in_pictures.py"]
+# ENTRYPOINT ["python3", "xyz.py"]
