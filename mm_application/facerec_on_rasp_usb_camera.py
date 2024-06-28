@@ -129,7 +129,7 @@ def main():
             prev_faces_nb = len(face_locations)
             
         else:
-            ret, frame = cap.grab()
+            ret = cap.grab()
             if not ret:
                 print("Finished")
                 break
