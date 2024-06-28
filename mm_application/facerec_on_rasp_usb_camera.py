@@ -66,7 +66,7 @@ def main():
     
     # Initialize variables
     # Used to define how often we capture the image
-    FRAMES_JUMP = 10
+    FRAMES_JUMP = 15
     face_locations = []
     face_encodings = []
     count = 0
