@@ -60,7 +60,7 @@ print("Encodings have been loaded", flush=True)
 
 
 
-cap = cv2.VideoCapture()
+cap = cv2.VideoCapture(0)
 
 def main():
     
