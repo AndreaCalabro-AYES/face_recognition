@@ -9,6 +9,9 @@ import numpy as np
 import cv2
 import time
 
+import sys
+sys.path.insert(0, '../MQTT_test/Listener_Publisher')
+import jolly as mqtt_client
 
 
 def load_db(db_path):
@@ -64,6 +67,8 @@ known_encodings = [np.array(encoding['encoding']) for encoding in db]
 
 print("Encodings have been loaded", flush=True)
 
+mqtt_client.connect()
+
 # Initialize some variables
 face_locations = []
 face_encodings = []
@@ -73,6 +78,8 @@ prev_faces_nb = 0
 FRAMES_JUMP = 10
 
 print("Ready to start recognition", flush=True)
+
+time.sleep(30)
 
 count = 0
 
@@ -129,6 +136,8 @@ while True:
                 [face_names.append(names[index]) for index in indexes]
         
             print(face_names)
+            data = json.dumps({"names" : face_names})
+            mqtt_client.publish("greetings/face_added", data)
 
         prev_faces_nb = len(face_locations)
     else:
