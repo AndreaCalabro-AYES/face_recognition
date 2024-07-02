@@ -52,8 +52,6 @@ def find_true_indices(boolean_list):
  
 test_dir = './test_files'  
 input_movie = load_test_video(test_dir, "Video Test")
-# Open the input movie file
-# input_movie = cv2.VideoCapture("hamilton_clip.mp4")
 frames = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = input_movie.get(cv2.CAP_PROP_FPS) # get the FPS
 width = int(input_movie.get(3))
