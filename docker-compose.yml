@@ -1,29 +1,16 @@
 version: '3'
 
 services:
-  mqtt_broker:
-    image: eclipse-mosquitto:latest
-    container_name: mqtt_broker
-    ports:
-      - "1883:1883"
-    volumes:
-      - mosquitto_log:/mosquitto/log
-      - mosquitto_data:/mosquitto/data
-      - ./MQTT_test/mosquitto.conf:/mosquitto/config/mosquitto.conf
-    networks:
-      - mqtt_network
-    restart: unless-stopped
-
   face_recognition:
     image: face_recognition_on_rasp
     container_name: face_recognition
 
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.rasp
 
-    working_dir: /face_recognition/ayes_model
-    command: python3 facerec_on_rasp_mock.py
+    working_dir: /face_recognition/mm_application
+    command: python3 facerec_on_rasp_usb_camera.py
 
     volumes:
       - ./:/face_recognition
@@ -35,14 +22,3 @@ services:
     # direct logging to terminal, no buffering for logs
     environment:
       - PYTHONUNBUFFERED=1
-      - MQTT_BROKER_HOST=mqtt_broker
-      - MQTT_BROKER_PORT=1883
-    networks:
-      - mqtt_network
-
-networks:
-  mqtt_network:
-
-volumes:
-  mosquitto_log:
-  mosquitto_data:
