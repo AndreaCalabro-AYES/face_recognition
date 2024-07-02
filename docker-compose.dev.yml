@@ -11,6 +11,8 @@ services:
     
     volumes:
       - ./ayes_model:/face_recognition/ayes_model_volume
+    networks:
+      - mqtt_network
 
     working_dir: /face_recognition/ayes_model_volume
     command: python3 facerec_on_rasp_mock.py
@@ -20,3 +22,7 @@ services:
     # direct logging to terminal, no buffering for logs
     environment:
       - PYTHONUNBUFFERED=1
+
+networks:
+  mqtt_network:
+    external: true
