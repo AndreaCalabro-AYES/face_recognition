@@ -1,17 +1,24 @@
-# AYES version 
-This is still a draft, here we will list what is needed to know for the AYES version of the face recognition app. 
+# AYES Face Recognition Project 
+The first application of the AYES-MagicMirror project is based on computer vision. 
+The expected output is to have a face recognition algorithm to recognize the people
+of the office (obviously only the ones that accepted to have their encodings taken).
+To start, we decided to create a fork from this [face recognition project](https://github.com/ageitgey/face_recognition), 
+in the future we will move towards a fully in-house application.
+If you feel that the following README file is not complete, you can refer to the [original project README](https://github.com/ageitgey/face_recognition)! (This file, like all the rest of the application, is built on that fundamentals.)
+
+
 
 ## Prerequisites 
-To use some of the applications, you may need to perform x11 server forwarding - in order to do so, please go to the README file of the magic mirror, later on we will better organize the folder structure.
-- Docker Desktop (again go to the Magic Mirror project to see how to obtain this)
+- Docker Desktop (ADD LINK TO THE INTERNAL DOCUMENTATION ABOUT IT)
+- x11 server forwarding (ADD LINK TO THE INTERNAL DOCUMENTATION) - only if in development you *really want* semi-live screen forwarding of the result of whatever you are developing. All the necessary dependencies will be commented out in both the dockerfile and docker-compose development files, if *really want* it uncomment the section. 
 
 ## Info dump
 ### Project Creation
-1. Create a repository 
+1. Go in the repository where you want to run this application 
 2. Clone the project in that repository (git clone https://github.com/AndreaCalabro-AYES/face_recognition.git)
 
 ### Project structure
-As of now everything is there, hence it's a bit heavy. Later on we will have a phase of optimization.
+As of now it's a bit heavy. Later on we will have a phase of optimization.
 - We have multiple dockerfiles, one that as of now hosts everything we need for all the possible applications, and one to use nvidia GPUs (there for eventual future needs)
 - There is a single docker-compose file. This is the one that will be used to launch the container, and it is where you should put your IP address if needed. 
 - ayes_model: where we train and test our model
@@ -20,12 +27,12 @@ As of now everything is there, hence it's a bit heavy. Later on we will have a p
 - all other folders: examples from the main project, still there for reference. 
 
 ### What to do
-1. *Train the model*
+1. *Tune the model*
 In the ayes_model folder there are two subfolders
 - test_files
 - train_files 
 
-In both you will need to put a different picture of you, the one in train_files will be used to tune the model and the one in test_files to test it ! 
+In both you will need to put a different picture of you, the one in train_files will be used to tune the model and the one in test_files to test the encoding ! If the test will be passed, the encoding will be created.
 It's quite **important** to give the correct name to both: the name of the tuning image will be used as identifier for your face encoding from now on, and to look for the correct test file!
 In the docker-compose file launch the command python3 create_face_encoding_db
 This will automatically manage the update of a database (now json, need optimization here as well).
