@@ -66,5 +66,12 @@ RUN pip install -r requirements.txt
 # Install specific version of opencv-python
 RUN pip install opencv-python==4.9.0.80
 
+
+# Download the mqtt_client_ayes.py file
+RUN curl -o /root/face_recognition/mm_application/mqtt_client_ayes.py https://raw.githubusercontent.com/AndreaCalabro-AYES/MQTT_Broker/main/mqtt_client_ayes.py
+
+# Ensure the current directory is in the PYTHONPATH
+ENV PYTHONPATH "${PYTHONPATH}:/root/face_recognition/mm_application"
+
 # Set the entrypoint to python script
 # ENTRYPOINT ["python3", "xyz.py"]

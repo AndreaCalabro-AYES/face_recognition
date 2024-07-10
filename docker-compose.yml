@@ -22,3 +22,4 @@ services:
     # direct logging to terminal, no buffering for logs
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/face_recognition/mm_application

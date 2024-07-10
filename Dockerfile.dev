@@ -50,6 +50,9 @@ RUN if [ '$(uname -m)' = "x86_64" ]; then \
         libopenblas-dev; \
 fi
 
+
+
+
 # Install dlib
 RUN cd ~ && \
     mkdir -p dlib && \
@@ -72,6 +75,15 @@ WORKDIR /face_recognition
 
 RUN echo "Installing opencv"
 RUN pip3 install opencv-python==4.9.0.80
+
+RUN echo "Download the mqtt_client_ayes.py file"
+# Download the mqtt_client_ayes.py file
+RUN curl -o /face_recognition/ayes_model/mqtt_client_ayes.py https://raw.githubusercontent.com/AndreaCalabro-AYES/MQTT_Broker/main/mqtt_client_ayes.py
+
+RUN echo "Ensure the current directory is in the PYTHONPATH"
+# Ensure the current directory is in the PYTHONPATH
+ENV PYTHONPATH "${PYTHONPATH}:/face_recognition/ayes_model"
+
 
 
 

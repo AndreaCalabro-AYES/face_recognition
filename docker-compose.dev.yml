@@ -15,6 +15,7 @@ services:
       - mqtt_network
 
     working_dir: /face_recognition/ayes_model_volume
+    # command: python3 create_face_encoding_db.py
     command: python3 facerec_on_rasp_mock.py
 
 
@@ -22,6 +23,7 @@ services:
     # direct logging to terminal, no buffering for logs
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/face_recognition/ayes_model
 
 networks:
   mqtt_network:
