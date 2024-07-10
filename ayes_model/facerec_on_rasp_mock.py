@@ -93,6 +93,7 @@ retry_recognition = False # Flag to retry if we got a new encoding, and such enc
 publish_flag = False # Flag to publish on mqtt
 retry_next_frame = False
 new_unknown_detected = False
+previous_names = []
 
 FRAMES_JUMP = 10
 
@@ -198,11 +199,13 @@ while True:
         
         # Publish only when necessary
         if publish_flag:
+            face_removed = json.dumps({"names" : previous_names})
+            face_recognition_client.publish_message("greetings/face_removed", face_removed)
             face_added_names = list(set(face_added_names))
             face_added = json.dumps({"names" : face_added_names})
             face_recognition_client.publish_message("greetings/face_added", face_added)
-            face_removed = json.dumps({"names" : face_removed_names})
-            face_recognition_client.publish_message("greetings/face_removed", face_removed)
+            previous_names = face_added_names
+
             
 
         prev_faces_nb = len(face_locations)
