@@ -9,11 +9,13 @@ services:
       context: .
       dockerfile: Dockerfile.rasp
 
-    working_dir: /face_recognition/mm_application
-    command: python3 facerec_on_rasp_usb_camera.py
+
 
     volumes:
-      - ./:/face_recognition
+      - ./mm_application:/face_recognition/mm_application_volume
+
+    working_dir: /face_recognition/mm_application_volume
+    command: python3 facerec_on_rasp_usb_camera.py
 
     devices:
       - dev/video0:dev/video0
@@ -23,3 +25,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/face_recognition/mm_application
+
+networks:
+  mqtt_network:
+    external: true
