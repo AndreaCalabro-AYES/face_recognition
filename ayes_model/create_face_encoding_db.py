@@ -21,7 +21,6 @@ def load_encodings(encodings_path):
                 encodings = json.load(file)
             except json.decoder.JSONDecodeError:
                 encodings = []
-                
     else:
         encodings = []
     
@@ -76,7 +75,7 @@ def process_train_files(train_dir, encodings):
     return new_encodings
 
 def main():
-    encodings_path = '../mm_application/encodings.json'
+    encodings_path = './encodings.json'
     train_dir = './train_files'
     test_dir = './test_files'
     

@@ -1,6 +1,7 @@
 # Use the official Python image for ARM
 FROM arm32v7/python:3.10-slim-bullseye
 
+RUN echo "Install build essentials and tools"
 # Install build essentials and tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -13,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN echo " Install graphics and multimedia libraries"
 # Install graphics and multimedia libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
     graphicsmagick \
@@ -29,33 +31,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
+RUN echo "Install OpenBLAS"
 # Install OpenBLAS
 RUN apt-get update && apt-get install -y libopenblas-dev && rm -rf /var/lib/apt/lists/*
 
+RUN echo "Install OpenSSL development package"
 # Install OpenSSL development package
 RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
 
+RUN echo "Set environment variables for OpenBLAS"
 # Set environment variables for OpenBLAS
 ENV LD_LIBRARY_PATH=/usr/lib/openblas:$LD_LIBRARY_PATH
 ENV OPENBLAS_NUM_THREADS=1
 
+RUN echo "Install numpy and pybind11"
 # Install numpy and pybind11
 RUN pip install numpy==1.26.4 pybind11==2.12.0
 
+RUN echo "Clone dlib repository"
 # Clone dlib repository
-RUN cd /root && git clone -b 'v19.22' --single-branch https://github.com/davisking/dlib.git dlib
+RUN cd ~ && git clone -b 'v19.22' --single-branch https://github.com/davisking/dlib.git dlib
 
+RUN echo "Install dlib dependencies"
 # Install dlib dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN echo "Build and install dlib"
 # Build and install dlib
-RUN cd /root/dlib && python3 setup.py install
+RUN cd /dlib && python3 setup.py install
 
 # Copy the face recognition app
-COPY . /root/face_recognition
-WORKDIR /root/face_recognition
+COPY . /face_recognition
+WORKDIR /face_recognition
 
 # Install face_recognition package
 RUN pip install .
@@ -63,8 +72,16 @@ RUN pip install .
 # Install Python dependencies
 RUN pip install -r requirements.txt
 
+RUN echo "Installing opencv"
 # Install specific version of opencv-python
 RUN pip install opencv-python==4.9.0.80
+
+RUN echo "Download the mqtt_client_ayes.py file"
+# Download the mqtt_client_ayes.py file
+RUN curl -o /root/face_recognition/mm_application/mqtt_client_ayes.py https://raw.githubusercontent.com/AndreaCalabro-AYES/MQTT_Broker/main/mqtt_client_ayes.py
+
+# Ensure the current directory is in the PYTHONPATH
+ENV PYTHONPATH "${PYTHONPATH}:/face_recognition/mm_application"
 
 # Set the entrypoint to python script
 # ENTRYPOINT ["python3", "xyz.py"]
