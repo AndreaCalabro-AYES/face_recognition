@@ -9,7 +9,9 @@ import numpy as np
 import cv2
 import time
 from mqtt_client_ayes import AyesMqttClient
+import logging
 
+log = logging.Logger("Face Recognition Logger")
 
 
 def load_db(db_path):
@@ -45,6 +47,130 @@ def find_true_indices(boolean_list):
     Find the indexes of the recognized persons 
     """
     return [index for index, value in enumerate(boolean_list) if value]
+
+def preprocess_frame(frame,horizontal_resizing= 0.5, vertical_resizing= 0.5):
+    """
+    Pre processing a frame, in particular
+    1. Resize it to make it smaller, having a faster recognition process
+        - The horizontal and vertical resizing values shall be (0,1]
+    2. Convert from BGR (OpenCV) to RGB (used  by the face recognition model).
+    Returns the small frame in rgb
+    """
+    
+    if (horizontal_resizing > 1) or (vertical_resizing > 1):
+        log.error("Accepted resizing values interval (0,1]")
+        
+    if (horizontal_resizing <= 0) or (vertical_resizing <= 0):
+        log.error("Accepted resizing values interval (0,1]")
+    
+    # Resize frame of video for faster face recognition processing
+    small_frame = cv2.resize(frame, (0, 0), fx=horizontal_resizing, fy=vertical_resizing)
+
+    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+    rgb_small_frame = small_frame[:, :, ::-1]
+    return rgb_small_frame
+
+
+def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= False):
+    """
+    Manages the face recognition process, updating the status of detected faces, and determining whether to retry 
+    recognition in the next frame.
+    
+    Parameters:
+    - rgb_small_frame: The current video frame in RGB format, from which faces are to be recognized.
+    - face_locations: List of coordinates where faces are detected in the current frame.
+    - retry_next_frame: Boolean indicating whether to retry face recognition in the next frame due to a previous unknown face.
+    - prev_faces_nb: The number of faces detected in the previous frame.
+    - print_logs: Boolean to indicate whether to print log messages (default is False).
+    
+    Returns:
+    - publish_flag: Boolean indicating whether the results should be published.
+    - retry_next_frame: Updated boolean indicating whether to retry face recognition in the next frame.
+    - face_added_names: List of names of recognized faces.
+    - prev_faces_nb: Updated number of faces detected in the current frame.
+    """
+    
+    face_added_names = []
+
+    
+    if len(face_locations) == 0:
+        
+        LOGGING_STRING = "No faces are being detected"
+        publish_flag = False
+        
+    
+    elif (len(face_locations) == prev_faces_nb) and (not retry_next_frame):
+        
+        LOGGING_STRING = "Still here?"
+        publish_flag = False
+        
+    
+    elif (len(face_locations) != prev_faces_nb) or retry_next_frame:
+        
+        publish_flag = True
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+        
+        if not retry_next_frame:
+        
+            
+            # print(face_locations)
+            LOGGING_STRING = "I see someone"
+            for face_encoding in face_encodings:
+                # See if the face is a match for the known face(s)
+                matches = face_recognition.compare_faces(known_encodings, face_encoding)
+                indexes = find_true_indices(matches)
+            # This if else condition is to give the algorithm time to recognize someone, so: 
+            # the first time we see someone, if we don't recognize it we try again
+            if indexes:
+                LOGGING_STRING = "Gotcha"
+                for index in indexes:
+                    face_added_names.append(names[index])
+            else:
+                # If we don't recognize anyone, then we will redo everything the next frame we want to process! 
+                LOGGING_STRING = "First Unknown Encounter"
+                publish_flag = False 
+                retry_next_frame = True  # Set flag to retry in the next processed frame
+        
+        elif retry_next_frame:
+            LOGGING_STRING = "I will retry to recognize again such unknown"
+            retry_next_frame = False
+            publish_flag = True
+            
+            for face_encoding in face_encodings:
+                matches = face_recognition.compare_faces(known_encodings, face_encoding)
+                indexes = find_true_indices(matches)
+                LOGGING_STRING = "I knew it"
+                for index in indexes:
+                    face_added_names.append(names[index])
+                if len(indexes) < len(face_encodings):  
+                    face_added_names.append("Unknown")
+                    LOGGING_STRING = "Someone is not in my system"
+    
+    else:
+        publish_flag = False
+        LOGGING_STRING = "You are in a situation not covered by the algorithm!!"
+    
+    if print_logs:
+        print(LOGGING_STRING)
+        
+    return publish_flag, retry_next_frame, face_added_names, prev_faces_nb
+
+
+def publish_messages(previous_names, face_added_names):
+    """
+    Send the messages to the MQTT broker
+    The function only activates if the publish flag is set to true, in such case: 
+    1. First send the names of the last recognized people on the face_removed topic
+    2. Send the names of the newly recognized people on the face_added topic
+    Returns the recognized faces, to be then used at step 1 the next time the function is called 
+    This is needed to have a quick and clean way to avoid having the names to be repeated multiple times.
+    """
+    face_removed = json.dumps({"names" : previous_names})
+    face_recognition_client.publish_message("greetings/face_removed", face_removed)
+    face_added_names = list(set(face_added_names))
+    face_added = json.dumps({"names" : face_added_names})
+    face_recognition_client.publish_message("greetings/face_added", face_added)
+    return face_added_names
    
 
  
@@ -65,11 +191,6 @@ print("Encodings have been loaded")
 print(names)
 MQTT_TOPICS = ["greetings/face_added",
                "greetings/face_removed"]
-
-FIRST_RECONNECT_DELAY = 1
-RECONNECT_RATE = 2
-MAX_RECONNECT_COUNT = 12
-MAX_RECONNECT_DELAY = 60
 CLIENT_ID = "FaceRecognition"
 MQTT_BROKER_HOST = "mqtt_broker"
 MQTT_BROKER_PORT = 1883
@@ -106,8 +227,6 @@ face_recognition_client.connect()
 while True:
 
     # Initialization
-    face_added_names = []   
-    face_removed_names = []
     count += 1 
 
     # Only process every other FRAMES_JUMP of video to save time
@@ -119,92 +238,24 @@ while True:
         frame_nb += 1
         if frame_nb > frames:
             print("finished!")
-            check = False
             break
         
         # Add the delay - based on the fps of the stream
         time.sleep(1/fps)
         
-        # Resize frame of video 70% size for faster face recognition processing
-        small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
-        
-        # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-        rgb_small_frame = small_frame[:, :, ::-1]
+        # Pre process frame
+        rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.5, vertical_resizing= 0.5)
         
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
-        # print(len(face_locations))
-        if len(face_locations) == 0:
-            
-            print("No faces are being detected")
-            publish_flag = False
-            
         
-        elif (len(face_locations) == prev_faces_nb) and (not retry_next_frame):
-            
-            print("Still here?")
-            publish_flag = False
-            
-        
-        elif (len(face_locations) > prev_faces_nb) or retry_next_frame:
-            
-            publish_flag = True
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-            
-            if not retry_next_frame:
-            
-                print("I see someone new")
-                
-                # print(face_locations)
-
-                for face_encoding in face_encodings:
-                    # See if the face is a match for the known face(s)
-                    matches = face_recognition.compare_faces(known_encodings, face_encoding)
-                    indexes = find_true_indices(matches)
-                    
-                if indexes:
-                    # Recognize matched faces
-                    for index in indexes:
-                        face_added_names.append(names[index])
-                else:
-                    face_added_names.append("Unknown")
-                    new_unknown_detected = True  # Mark that an unknown face was detected
-                
-                if new_unknown_detected:
-                    print("There is an unknown person")
-                    publish_flag = False
-                    retry_next_frame = True  # Set flag to retry in the next processed frame
-            
-            elif retry_next_frame:
-                print("I will retry to recognize again such unknown")
-                retry_next_frame = False
-                
-                for face_encoding in face_encodings:
-                    matches = face_recognition.compare_faces(known_encodings, face_encoding)
-                    indexes = find_true_indices(matches)
-                if len(indexes) == len(face_encodings):
-                    for index in indexes:
-                        face_added_names.append(names[index])
-                        face_removed_names.append("Unknown")
-                        
-                else:
-                    publish_flag = True
-                    # face_names.append("Unknown")
-                    face_added_names.append(names[index])
-                    face_added_names.append("Unknown")
-                    print("You are not in my system")
-                    new_unknown_detected = False  # Mark that we retried
-                
+        # Main face rec AYES algo
+        publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= True)
     
         
         # Publish only when necessary
         if publish_flag:
-            face_removed = json.dumps({"names" : previous_names})
-            face_recognition_client.publish_message("greetings/face_removed", face_removed)
-            face_added_names = list(set(face_added_names))
-            face_added = json.dumps({"names" : face_added_names})
-            face_recognition_client.publish_message("greetings/face_added", face_added)
-            previous_names = face_added_names
+            previous_names = publish_messages(previous_names, face_added_names)
 
             
 
@@ -215,7 +266,6 @@ while True:
         frame_nb += 1
         if frame_nb > frames:
             print("finished!")
-            check = False
             break
         
     
