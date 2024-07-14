@@ -11,8 +11,7 @@ services:
     
     volumes:
       - ./ayes_model:/face_recognition/ayes_model_volume
-    networks:
-      - mqtt_network
+    network_mode: host
 
     working_dir: /face_recognition/ayes_model_volume
     # command: python3 create_face_encoding_db.py
@@ -24,7 +23,3 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/face_recognition/ayes_model
-
-networks:
-  mqtt_network:
-    external: true

@@ -192,7 +192,7 @@ print(names)
 MQTT_TOPICS = ["greetings/face_added",
                "greetings/face_removed"]
 CLIENT_ID = "FaceRecognition"
-MQTT_BROKER_HOST = "mqtt_broker"
+MQTT_BROKER_HOST = "localhost"
 MQTT_BROKER_PORT = 1883
 
 face_recognition_client = AyesMqttClient(
