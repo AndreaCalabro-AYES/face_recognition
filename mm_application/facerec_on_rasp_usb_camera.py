@@ -202,6 +202,7 @@ face_recognition_client = AyesMqttClient(
     client_id= CLIENT_ID
 )
 
+face_recognition_client.connect()
 
 cap = cv2.VideoCapture(0)
 
