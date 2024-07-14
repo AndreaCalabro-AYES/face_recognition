@@ -202,6 +202,7 @@ face_recognition_client = AyesMqttClient(
     client_id= CLIENT_ID
 )
 
+face_recognition_client.connect()
 
 cap = cv2.VideoCapture(0)
 
@@ -251,7 +252,7 @@ def main():
             face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
             
             # Main face rec AYES algo
-            publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= True)
+            publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= False)
         
             
             # Publish only when necessary
