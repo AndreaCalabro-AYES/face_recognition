@@ -43,6 +43,40 @@ def get_knwon_info(db_path = "../mm_application/encodings.json"):
     
     return names, known_encodings
 
+def find_true_indices(boolean_list):
+    """
+    Find the indexes of the recognized persons 
+    
+    """
+    return_index = -1
+    for index, value in enumerate(boolean_list):
+        if value:
+            return_index = index 
+    
+    return return_index
+
+def preprocess_frame(frame,horizontal_resizing= 0.5, vertical_resizing= 0.5):
+    """
+    Pre processing a frame, in particular
+    1. Resize it to make it smaller, having a faster recognition process
+        - The horizontal and vertical resizing values shall be (0,1]
+    2. Convert from BGR (OpenCV) to RGB (used  by the face recognition model).
+    Returns the small frame in rgb
+    """
+    
+    if (horizontal_resizing > 1) or (vertical_resizing > 1):
+        log.error("Accepted resizing values interval (0,1]")
+        
+    if (horizontal_resizing <= 0) or (vertical_resizing <= 0):
+        log.error("Accepted resizing values interval (0,1]")
+    
+    # Resize frame of video for faster face recognition processing
+    small_frame = cv2.resize(frame, (0, 0), fx=horizontal_resizing, fy=vertical_resizing)
+
+    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+    rgb_small_frame = small_frame[:, :, ::-1]
+    return rgb_small_frame
+
 def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= False):
     """
     Manages the face recognition process, updating the status of detected faces, and determining whether to retry 
@@ -81,7 +115,7 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
         
         publish_flag = True
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-        
+        indexes = []
         if not retry_next_frame:
         
             
@@ -90,14 +124,15 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
             for face_encoding in face_encodings:
                 # See if the face is a match for the known face(s)
                 matches = face_recognition.compare_faces(known_encodings, face_encoding)
-                indexes = find_true_indices(matches)
+                index = find_true_indices(matches)
+                indexes.append(index)
             # This if else condition is to give the algorithm time to recognize someone, so: 
             # the first time we see someone, if we don't recognize it we try again
-            if indexes:
-                LOGGING_STRING = "Gotcha"
+            if sum(indexes) >= 0:
+                LOGGING_STRING = "I know someone"
                 for index in indexes:
                     face_added_names.append(names[index])
-            else:
+            if -1 in indexes: # -1 is the default value we give to unkonwn encodings
                 # If we don't recognize anyone, then we will redo everything the next frame we want to process! 
                 LOGGING_STRING = "First Unknown Encounter"
                 publish_flag = False 
@@ -110,13 +145,16 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
             
             for face_encoding in face_encodings:
                 matches = face_recognition.compare_faces(known_encodings, face_encoding)
-                indexes = find_true_indices(matches)
-                LOGGING_STRING = "I knew it"
+                index = find_true_indices(matches)
+                indexes.append(index)
+                
                 for index in indexes:
                     face_added_names.append(names[index])
-                if len(indexes) < len(face_encodings):  
+                if -1 in indexes: # -1 is the default value we give to unkonwn encodings
                     face_added_names.append("Unknown")
                     LOGGING_STRING = "Someone is not in my system"
+                else:
+                    LOGGING_STRING = "I knew it"
     
     else:
         publish_flag = False
@@ -126,40 +164,6 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
         print(LOGGING_STRING)
         
     return publish_flag, retry_next_frame, face_added_names, prev_faces_nb
-
-
-# 
-def find_true_indices(boolean_list):
-    """
-    Find the indexes of the recognized persons 
-    """
-    return [index for index, value in enumerate(boolean_list) if value]
-
-
-
-def preprocess_frame(frame,horizontal_resizing= 0.5, vertical_resizing= 0.5):
-    """
-    Pre processing a frame, in particular
-    1. Resize it to make it smaller, having a faster recognition process
-        - The horizontal and vertical resizing values shall be (0,1]
-    2. Convert from BGR (OpenCV) to RGB (used  by the face recognition model).
-    Returns the small frame in rgb
-    """
-    
-    if (horizontal_resizing > 1) or (vertical_resizing > 1):
-        log.error("Accepted resizing values interval (0,1]")
-        
-    if (horizontal_resizing <= 0) or (vertical_resizing <= 0):
-        log.error("Accepted resizing values interval (0,1]")
-    
-    # Resize frame of video for faster face recognition processing
-    small_frame = cv2.resize(frame, (0, 0), fx=horizontal_resizing, fy=vertical_resizing)
-
-    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-    rgb_small_frame = small_frame[:, :, ::-1]
-    return rgb_small_frame
-
-
 
 def publish_messages(previous_names, face_added_names):
     """
@@ -246,10 +250,10 @@ def main():
                 break
 
             # Pre process frame
-            rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.5, vertical_resizing= 0.5)
+            rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.75, vertical_resizing= 0.75)
             
             # Find all the faces and face encodings in the current frame of video
-            face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
+            face_locations = face_recognition.face_locations(rgb_small_frame)
             
             # Main face rec AYES algo
             publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= False)
