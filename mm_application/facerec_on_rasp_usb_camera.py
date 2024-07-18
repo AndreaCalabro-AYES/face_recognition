@@ -253,7 +253,7 @@ def main():
             
             # Pre process frame
             rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.7, vertical_resizing= 0.7)
-            # cv2.imwrite("PreprocessedFrame.jpg", rgb_small_frame)
+            cv2.imwrite("PreprocessedFrame.jpg", rgb_small_frame)
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_small_frame)
             # Main face rec AYES algo
