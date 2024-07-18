@@ -17,7 +17,7 @@ services:
     command: python3 facerec_on_rasp_usb_camera.py
 
     devices:
-      - dev/video0:dev/video0
+      - /dev/video0:/dev/video0
 
     privileged: true
     # direct logging to terminal, no buffering for logs
