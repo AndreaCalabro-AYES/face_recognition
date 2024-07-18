@@ -220,6 +220,7 @@ def main():
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Can't open webcam")
+        return 
     else:
         print("Webcam Opened")
     
