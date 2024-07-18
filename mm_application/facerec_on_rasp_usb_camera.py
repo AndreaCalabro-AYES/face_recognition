@@ -257,7 +257,8 @@ def main():
             print("Frame pre_processed")
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_small_frame)
-            
+            print("found face locations")
+            print(face_locations)
             # Main face rec AYES algo
             publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= True)
         
