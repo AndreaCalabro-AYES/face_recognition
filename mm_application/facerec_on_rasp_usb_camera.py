@@ -242,7 +242,6 @@ def main():
     while True:
         
         count += 1 
-        
         # Only process every other FRAMES_JUMP of video to save time
         if count % FRAMES_JUMP == 0:
             
@@ -251,13 +250,12 @@ def main():
             if not ret:
                 print("Ciao")
                 break
-
-            # Pre process frame
-            rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.75, vertical_resizing= 0.75)
             
+            # Pre process frame
+            rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.7, vertical_resizing= 0.7)
+            cv2.imwrite("PreprocessedFrame.jpg", rgb_small_frame)
             # Find all the faces and face encodings in the current frame of video
             face_locations = face_recognition.face_locations(rgb_small_frame)
-            
             # Main face rec AYES algo
             publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= True)
         
