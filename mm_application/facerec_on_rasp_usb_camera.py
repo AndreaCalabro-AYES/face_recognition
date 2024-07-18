@@ -256,7 +256,7 @@ def main():
             rgb_small_frame = preprocess_frame(frame, horizontal_resizing= 0.7, vertical_resizing= 0.7)
             print("Frame pre_processed")
             # Find all the faces and face encodings in the current frame of video
-            face_locations = face_recognition.face_locations(rgb_small_frame)
+            face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
             print("found face locations")
             print(face_locations)
             # Main face rec AYES algo
