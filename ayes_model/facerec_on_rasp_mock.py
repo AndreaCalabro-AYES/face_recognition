@@ -187,7 +187,7 @@ def publish_messages(previous_names, face_added_names):
 
  
 test_dir = './test_files'  
-input_movie = load_test_video(test_dir, "Video Test Nous")
+input_movie = load_test_video(test_dir, "Video Test")
 frames = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = input_movie.get(cv2.CAP_PROP_FPS) # get the FPS
 width = int(input_movie.get(3))

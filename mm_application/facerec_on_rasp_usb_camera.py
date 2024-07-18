@@ -211,34 +211,34 @@ face_recognition_client = AyesMqttClient(
 
 face_recognition_client.connect()
 
-cap = cv2.VideoCapture(0)
 
-print("Ready to start")
+
+
 
 def main():
+    
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        print("Can't open webcam")
+        return 
+    else:
+        print("Webcam Opened")
     
     # Initialize variables
     # Used to define how often we capture the image
     face_locations = []
-    face_encodings = []
-    sent_faces = []
-    frame_nb = 1
     prev_faces_nb = 0
     count = 0
-    retry_recognition = False # Flag to retry if we got a new encoding, and such encoding is unknown 
     publish_flag = False # Flag to publish on mqtt
-    retry_next_frame = False
-    new_unknown_detected = False
+    retry_next_frame = False # Flag to retry if we got a new encoding, and such encoding is unknown 
     previous_names = []
 
     FRAMES_JUMP = 15
-    
-    
-    if not cap.isOpened():
-        print("Can't open webcam")
-        return 1
-        
 
+    print("Initialized variables")
+    
+        
+    print("Entering the while loop")
     while True:
         
         
@@ -261,7 +261,7 @@ def main():
             face_locations = face_recognition.face_locations(rgb_small_frame)
             
             # Main face rec AYES algo
-            publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= False)
+            publish_flag, retry_next_frame, face_added_names, prev_faces_nb = manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, prev_faces_nb, print_logs= True)
         
             
             # Publish only when necessary
