@@ -132,11 +132,13 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
                 LOGGING_STRING = "I know someone"
                 for index in indexes:
                     face_added_names.append(names[index])
-            if -1 in indexes: # -1 is the default value we give to unkonwn encodings
+            elif -1 in indexes: # -1 is the default value we give to unkonwn encodings
                 # If we don't recognize anyone, then we will redo everything the next frame we want to process! 
                 LOGGING_STRING = "First Unknown Encounter"
                 publish_flag = False 
                 retry_next_frame = True  # Set flag to retry in the next processed frame
+            else:
+                log.error("You should not be here")
         
         elif retry_next_frame:
             LOGGING_STRING = "I will retry to recognize again such unknown"
@@ -147,12 +149,11 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
                 matches = face_recognition.compare_faces(known_encodings, face_encoding)
                 index = find_true_indices(matches)
                 indexes.append(index)
-                
             if sum(indexes) >= 0:
                 LOGGING_STRING = "I know someone"
                 for index in indexes:
                     face_added_names.append(names[index])
-            if -1 in indexes: # -1 is the default value we give to unkonwn encodings
+            elif -1 in indexes: # -1 is the default value we give to unkonwn encodings
                 face_added_names.append("Unknown")
                 LOGGING_STRING = "Someone is not in my system"
             else:
