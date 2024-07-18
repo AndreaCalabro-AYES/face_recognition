@@ -147,14 +147,17 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
                 matches = face_recognition.compare_faces(known_encodings, face_encoding)
                 index = find_true_indices(matches)
                 indexes.append(index)
-                
+            
+            
+            if sum(indexes) >= 0:
+                LOGGING_STRING = "I know someone"
                 for index in indexes:
                     face_added_names.append(names[index])
-                if -1 in indexes: # -1 is the default value we give to unkonwn encodings
-                    face_added_names.append("Unknown")
-                    LOGGING_STRING = "Someone is not in my system"
-                else:
-                    LOGGING_STRING = "I knew it"
+            if -1 in indexes: # -1 is the default value we give to unkonwn encodings
+                face_added_names.append("Unknown")
+                LOGGING_STRING = "Someone is not in my system"
+            else:
+                LOGGING_STRING = "We may have a problem here"
     
     else:
         publish_flag = False
@@ -209,6 +212,8 @@ face_recognition_client = AyesMqttClient(
 face_recognition_client.connect()
 
 cap = cv2.VideoCapture(0)
+
+print("Ready to start")
 
 def main():
     
