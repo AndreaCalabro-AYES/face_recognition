@@ -123,7 +123,7 @@ def manage_face_recognition(rgb_small_frame, face_locations, retry_next_frame, p
             LOGGING_STRING = "I see someone"
             for face_encoding in face_encodings:
                 # See if the face is a match for the known face(s)
-                matches = face_recognition.compare_faces(known_encodings, face_encoding)
+                matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.5)
                 index = find_true_indices(matches)
                 indexes.append(index)
             # This if else condition is to give the algorithm time to recognize someone, so: 
