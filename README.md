@@ -87,7 +87,6 @@ The setup is
 
 ## Next Steps
 Many improvements are on the timeline 
-1. First a refined algorithm to communicate with the Magic Mirror application
-2. Optimization of this heavy task
-3. Migrate towards a self developed ML model, reducing the amount of dependencies
+1. Optimization of this heavy task
+2. Migrate towards a self developed ML model, reducing the amount of dependencies
 
