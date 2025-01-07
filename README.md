@@ -85,6 +85,67 @@ The setup is
 - An MQTT client, more info [here](https://github.com/AndreaCalabro-AYES/MQTT_Broker/blob/development/README.md#client)
 - The algorithm that looks for faces in a frame, and recognizes any encodings corresponding to one in its database (the encodings.js). 
 
+# Extra
+
+
+# How to Transfer and Load a Docker Tar File on a Raspberry Pi
+
+## Step 1: Transfer the Tar File to the Raspberry Pi
+
+To transfer the `.tar` file containing the Docker container image to your Raspberry Pi, you can use one of the following methods:
+
+### Option 1: Using `scp` Command
+If your local machine has SSH access to the Raspberry Pi, use the `scp` command to copy the file:
+
+```bash
+scp path/to/your-image.tar pi@<raspberry-pi-ip>:/path/to/destination
+```
+
+Replace:
+- `path/to/your-image.tar` with the full path to your `.tar` file.
+- `pi@<raspberry-pi-ip>` with your Raspberry Pi's username and IP address.
+- `/path/to/destination` with the desired destination directory on the Raspberry Pi.
+
+### Option 2: Using a USB Drive
+1. Copy the `.tar` file to a USB drive from your local machine.
+2. Insert the USB drive into the Raspberry Pi.
+3. Mount the USB drive (if not auto-mounted):
+   ```bash
+   sudo mount /dev/sdX1 /mnt/usb
+   ```
+   Replace `/dev/sdX1` with the correct device identifier for your USB drive.
+4. Copy the `.tar` file to your desired location on the Raspberry Pi:
+   ```bash
+   cp /mnt/usb/your-image.tar /path/to/destination
+   ```
+
+### Option 3: Using a File Sharing Tool
+You can also use file sharing tools like `rsync`, Samba, or a cloud-based solution (e.g., Google Drive) to transfer the file to your Raspberry Pi.
+
+---
+
+## Step 2: Load the Docker Image
+
+After transferring the `.tar` file to the Raspberry Pi, load it into Docker using the following command:
+
+```bash
+docker load < /path/to/your-image.tar
+```
+
+### Verifying the Loaded Image
+Once the image is loaded, confirm it is available by listing all images:
+
+```bash
+docker images
+```
+
+The output will display the list of images, including the one you just loaded. Check for the image name and tag (e.g., `my-image:latest`).
+
+---
+
+This guide covers transferring a `.tar` file and loading it into Docker on a Raspberry Pi. Proceed to the next steps to configure and run the container using `docker-compose`.
+
+
 ## Next Steps
 Many improvements are on the timeline 
 1. First a refined algorithm to communicate with the Magic Mirror application
