@@ -16,8 +16,10 @@ if __name__ == "__main__":
         print("User name already exists")
         exit()
     
-    for i in range(1, 6):        
-        input("Press enter to take picture (" + str(i) + "/" + str(5) + ")")
+    NUMBER_OF_PICTURES = 10
+    
+    for i in range(1, NUMBER_OF_PICTURES + 1):        
+        input("Press enter to take picture (" + str(i) + "/" + str(NUMBER_OF_PICTURES) + ")")
         
         camera = cv2.VideoCapture(0)
         if not camera.isOpened(): break
