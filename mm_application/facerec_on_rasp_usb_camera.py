@@ -78,7 +78,7 @@ def detect_faces(rgb_small_frame):
     
     # See if the face is a match for the known face(s)
     for face_encoding in face_encodings:
-        matches = face_recognition.compare_faces(known_encodings, face_encoding)
+        matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.55)
         index = find_true_indices(matches)
         
         if index == -1:
