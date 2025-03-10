@@ -6,15 +6,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     gfortran \
+    gcc \
+    python3 \
+    python3-dev \
+    musl-dev \
     git \
     wget \
     curl \
     software-properties-common \
     zip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install graphics and multimedia libraries
-RUN apt-get update && apt-get install -y --no-install-recommends \
     graphicsmagick \
     libgraphicsmagick1-dev \
     libatlas-base-dev \
@@ -53,25 +53,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Build and install dlib
 RUN cd /root/dlib && python3 setup.py install
 
-# Copy the face recognition app
-COPY . /root/face_recognition
+# Set working directory
 WORKDIR /root/face_recognition
 
-# Install face_recognition package
-RUN pip install .
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies
-RUN pip install -r requirements.txt
+COPY setup.py .
+COPY setup.cfg .
+COPY pyproject.toml .
+COPY README.rst .
+COPY HISTORY.rst .
+COPY face_recognition/ .
+COPY . .
+RUN pip install --no-cache-dir .
 
-# Install specific version of opencv-python
-RUN pip install opencv-python==4.9.0.80
+RUN pip install --no-cache-dir opencv-python==4.9.0.80
 
-
-# Download the mqtt_client_ayes.py file
+# Import files
+COPY mm_application/ ./mm_application/
 RUN curl -o /root/face_recognition/mm_application/mqtt_client_ayes.py https://raw.githubusercontent.com/AndreaCalabro-AYES/MQTT_Broker/main/mqtt_client_ayes.py
 
 # Ensure the current directory is in the PYTHONPATH
 ENV PYTHONPATH "${PYTHONPATH}:/root/face_recognition/mm_application"
 
-# Set the entrypoint to python script
-# ENTRYPOINT ["python3", "xyz.py"]
