@@ -127,14 +127,13 @@ if __name__ == "__main__":
             }
     
     while True:
-        frame_i = frame_i + 1
+        ret, frame = cap.read()
         
-        if (frame_i % 2) == 0:
+        must_process_frame = ((frame_i % 2) == 0) and (not ret)
+        frame_i += 1
+        
+        if must_process_frame:            
             current_time = time.time()
-                
-            ret, frame = cap.read()
-            
-            if not ret: continue
             
             rgb_small_frame = preprocess_frame(frame) 
             current_people_on_frame = detect_faces(rgb_small_frame)
@@ -176,8 +175,5 @@ if __name__ == "__main__":
             if (len(publish_added_people) > 0) or (len(publish_removed_people) > 0):
                 publish_messages(publish_removed_people, publish_added_people)
                 print(publish_removed_people, publish_added_people)
-            
-        else:
-            cap.grab()
             
         time.sleep(0.01)
