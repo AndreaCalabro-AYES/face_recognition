@@ -7,32 +7,35 @@ import time
 from mqtt_client_ayes import AyesMqttClient
 
 
-def load_db(db_path):
-    """
-    Load the existing encodings json file, to get the existing encodings 
-    """
-    if os.path.exists(db_path):
-        with open(db_path, 'r') as file:
-            try: 
-                return json.load(file)
-            except json.decoder.JSONDecodeError:
-                pass
-            
-    return []
+# KEPT LIKE THIS AS THIS MAY MOVE AROUND IN THE FUTURE
+ENCODINGS_PATH = "./encodings.json"
 
+if os.path.exists(ENCODINGS_PATH):
+    with open(ENCODINGS_PATH, 'r') as file:
+        try: 
+            db = json.load(file)
+        except json.decoder.JSONDecodeError:
+            db = []
 
-def get_known_info(db_path = "../mm_application/encodings.json"):
-    """
-    Load the db from the path, and extract
-        1. the names usign the "name" kwd of the json file 
-        2. the encodings using the "encodings" kwd of the json file, 
-           and transofrm them in a np.array to be used by the face_recognition
-    """
-    db = load_db(db_path)
-    names = [encoding['name'] for encoding in db]
-    known_encodings = [np.array(encoding['encoding']) for encoding in db] 
-    
-    return names, known_encodings
+names = [encoding['name'] for encoding in db]
+known_encodings = [np.array(encoding['encoding']) for encoding in db]
+
+mqtt_handler_client = AyesMqttClient(
+    broker = "localhost",
+    port = 1883,
+    topics_list = ["greetings/face_added", "greetings/face_removed"],
+    client_id = "FaceRecognition"
+)
+
+# Wait until mqtt handler is running
+while True:
+    try :
+        mqtt_handler_client.connect()
+        break
+
+    except Exception as e:
+        print(e)
+        time.sleep(1)
 
 
 def find_true_indices(boolean_list):
@@ -104,19 +107,6 @@ def publish_messages(removed_people, added_people):
     mqtt_handler_client.publish_message("greetings/face_removed", face_removed)
     face_added = json.dumps({"names" : added_people})
     mqtt_handler_client.publish_message("greetings/face_added", face_added)
-
-
-# KEPT LIKE THIS AS THIS MAY MOVE AROUND IN THE FUTURE
-names, known_encodings = get_known_info(db_path="./encodings.json")
-
-mqtt_handler_client = AyesMqttClient(
-    broker = "localhost",
-    port = 1883,
-    topics_list = ["greetings/face_added", "greetings/face_removed"],
-    client_id = "FaceRecognition"
-)
-
-mqtt_handler_client.connect()
 
 
 if __name__ == "__main__":    
