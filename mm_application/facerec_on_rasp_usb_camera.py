@@ -56,7 +56,7 @@ def preprocess_frame(frame):
     Returns the small frame in rgb
     """
     
-    RESIZING = 0.7
+    RESIZING = 0.5
     
     # Resize frame of video for faster face recognition processing
     small_frame = cv2.resize(frame, (0, 0), fx=RESIZING, fy=RESIZING)
@@ -189,3 +189,5 @@ if __name__ == "__main__":
             
         else:
             cap.grab()
+            
+        time.sleep(0.01)
