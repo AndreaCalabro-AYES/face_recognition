@@ -25,4 +25,4 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/root/face_recognition/mm_application
 
-    restart: always
+    restart: unless-stopped
