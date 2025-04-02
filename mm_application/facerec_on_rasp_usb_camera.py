@@ -129,7 +129,7 @@ if __name__ == "__main__":
     while True:
         ret, frame = cap.read()
         
-        must_process_frame = ((frame_i % 2) == 0) and (not ret)
+        must_process_frame = ((frame_i % 2) == 0) and ret
         frame_i += 1
         
         if must_process_frame:            
